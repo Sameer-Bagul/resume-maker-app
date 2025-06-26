@@ -4,92 +4,144 @@ import {
   Text,
   TouchableOpacity,
   View,
-  Platform,
-  TextInput,
+  Alert,
 } from 'react-native';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import { useAppContext } from '../../context/AppContext';
+import { colors, spacing } from '../../styles/globalStyles';
+import { CustomTextInput, CustomButton, CustomHeader } from '../../components';
 
 const PersonalDetailsScreen = () => {
   const navigation = useNavigation<NavigationProp<any>>();
-  const [name, setName] = React.useState<string>("");
-  const [email, setEmail] = React.useState<string>("");
-  const [phone, setPhone] = React.useState<string>("");
-  const [address, setAddress] = React.useState<string>("");
+  const { state, updatePersonalDetails } = useAppContext();
+  
+  const [formData, setFormData] = useState({
+    name: state.personalDetails?.name || "",
+    email: state.personalDetails?.email || "",
+    phone: state.personalDetails?.phone || "",
+    address: state.personalDetails?.address || "",
+  });
 
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+
+  const validateForm = () => {
+    const newErrors = { name: "", email: "", phone: "", address: "" };
+    let isValid = true;
+
+    if (!formData.name.trim()) {
+      newErrors.name = "Name is required";
+      isValid = false;
+    }
+
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+      isValid = false;
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+      isValid = false;
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+      isValid = false;
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
+  const handleSave = () => {
+    if (validateForm()) {
+      updatePersonalDetails(formData);
+      navigation.goBack();
+    } else {
+      Alert.alert("Validation Error", "Please fill in all required fields correctly.");
+    }
+  };
+
+  const updateField = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#007AFF" />
+      
+      <CustomHeader
+        title="Personal Details"
+        onBackPress={() => navigation.goBack()}
+      />
 
-      <StatusBar barStyle={"light-content"} backgroundColor="#007AFF" />
-
-      <Animated.View entering={FadeInUp.duration(500)} style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" style={{ paddingTop: 20 }} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Personal Details</Text>
-        <View style={{ width: 24 }} />
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeInUp.duration(500).delay(200)}
-        style={styles.formContainer}
+      <KeyboardAwareScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        enableOnAndroid={true}
+        keyboardShouldPersistTaps="handled"
       >
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Name</Text>
-          <TextInput
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-            placeholder='Enter your name'
-            placeholderTextColor="#999"
+        <Animated.View
+          entering={FadeInUp.duration(500).delay(200)}
+          style={styles.formContainer}
+        >
+          <CustomTextInput
+            label="Full Name"
+            value={formData.name}
+            onChangeText={(text) => updateField('name', text)}
+            placeholder="Enter your full name"
+            error={errors.name}
           />
-        </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-            placeholder='Enter your email'
-            placeholderTextColor="#999"
-            keyboardType='email-address'
+          <CustomTextInput
+            label="Email Address"
+            value={formData.email}
+            onChangeText={(text) => updateField('email', text)}
+            placeholder="Enter your email"
+            error={errors.email}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
-        </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Phone</Text>
-          <TextInput
-            style={styles.input}
-            value={phone}
-            onChangeText={setPhone}
-            placeholder='Enter your phone number'
-            placeholderTextColor="#999"
-            keyboardType='phone-pad'
+          <CustomTextInput
+            label="Phone Number"
+            value={formData.phone}
+            onChangeText={(text) => updateField('phone', text)}
+            placeholder="Enter your phone number"
+            error={errors.phone}
+            keyboardType="phone-pad"
           />
-        </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Address</Text>
-          <TextInput
-            style={[styles.input, styles.multilineInput]}
-            value={address}
-            onChangeText={setAddress}
-            placeholder='Enter your address'
-            placeholderTextColor="#999"
-            multiline
+          <CustomTextInput
+            label="Address"
+            value={formData.address}
+            onChangeText={(text) => updateField('address', text)}
+            placeholder="Enter your address"
+            error={errors.address}
+            multiline={true}
+            numberOfLines={3}
           />
-        </View>
-        
-        <TouchableOpacity style={styles.saveButton} onPress={() => {}}>
-          <Text style={styles.saveButtonText}>Save</Text>
-        </TouchableOpacity>
 
-      </Animated.View>
-
+          <CustomButton
+            title="Save Personal Details"
+            onPress={handleSave}
+            style={styles.saveButton}
+          />
+        </Animated.View>
+      </KeyboardAwareScrollView>
     </View>
   );
 };
@@ -99,72 +151,15 @@ export default PersonalDetailsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.background,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-    // paddingTop: StatusBar.currentHeight || 40,
-    backgroundColor: '#007AFF',
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#fff',
-    paddingTop: 20,
+  scrollContainer: {
+    flex: 1,
   },
   formContainer: {
-    flex: 1,
-    padding: 20,
-    marginTop: 20,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 5,
-  },
-  input: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 10,
-    fontSize: 16,
-    color: '#333',
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    borderColor: '#ddd',
-    borderWidth: 1,
-  },
-  multilineInput: {
-    minHeight: 80,
-    textAlignVertical: 'top',
+    padding: spacing.lg,
   },
   saveButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  saveButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+    marginTop: spacing.xl,
   },
 });

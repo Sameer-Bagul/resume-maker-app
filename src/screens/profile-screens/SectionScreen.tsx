@@ -11,6 +11,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useAppContext } from "../../context/AppContext";
 import Animated, { FadeInUp } from "react-native-reanimated";
+import { LinearGradient } from 'expo-linear-gradient';
+import { colors, spacing, typography, shadows } from "../../styles/globalStyles";
+import { EnhancedCard } from "../../components";
 
 type SectionScreenProps = {
   sectionName: string;
@@ -26,108 +29,181 @@ const SectionScreen: React.FC<SectionScreenProps> = ({
   const navigation = useNavigation();
   const { state } = useAppContext();
 
-  const renderItem = ({ item }: { item: any }) => {
-    if (section == "experience") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item?.jobTitle}</Text>
-          <Text style={styles.itemSubtitle}>
-            {item?.companyName} • {item?.location}
-          </Text>
-          <Text style={styles.itemDetail}>{item?.duration}</Text>
-          <Text style={styles.itemDescription}>{item?.description}</Text>
-        </View>
-      );
-    } else if (section == "hobbies/interests") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item?.hobby}</Text>
-        </View>
-      );
-    } else if (section == "skills") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item?.skillName}</Text>
-          <Text style={styles.itemDetail}>
-            Proficiecny: {item?.proficiency}
-          </Text>
-        </View>
-      );
-    } else if (section == "projects") {
-      return (
-        <View>
-          <Text>{item?.projectName}</Text>
-          <Text>Role: {item?.role}</Text>
-          <Text>Duration: {item?.duration}</Text>
-          <Text>{item?.description}</Text>
-        </View>
-      );
-    } else if (section === "qualifications") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item.degree}</Text>
-          <Text style={styles.itemSubtitle}>{item.institution}</Text>
-          <Text style={styles.itemDetail}>Duration: {item.duration}</Text>
-          {item.description && (
-            <Text style={styles.itemDescription}>{item.description}</Text>
-          )}
-        </View>
-      );    } else if (section == "languages") {
-      return (
-        <View>
-          <Text>{item?.language}</Text>
-          <Text>Proficiency: {item.proficiency}</Text>
-        </View>
-      );
-    } else if (section == "certificates") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item?.certificateName}</Text>
-          <Text style={styles.itemSubtitle}>{item?.issuingOrganization}</Text>
-          <Text style={styles.itemDetail}>Issue Date: {item?.issueDate}</Text>
-          {item?.expirationDate && (
-            <Text style={styles.itemDetail}>Expires: {item?.expirationDate}</Text>
-          )}
-          {item?.description && (
-            <Text style={styles.itemDescription}>{item?.description}</Text>
-          )}
-        </View>
-      );
-    } else if (section == "awards/scholarships") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item?.awardName}</Text>
-          <Text style={styles.itemSubtitle}>{item?.issuingOrganization}</Text>
-          <Text style={styles.itemDetail}>Date Received: {item?.dateReceived}</Text>
-          {item?.description && (
-            <Text style={styles.itemDescription}>{item?.description}</Text>
-          )}
-        </View>
-      );
-    } else if (section == "organizations") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item?.organizationName}</Text>
-          <Text style={styles.itemSubtitle}>Role: {item?.role}</Text>
-          <Text style={styles.itemDetail}>Duration: {item?.duration}</Text>
-          {item?.description && (
-            <Text style={styles.itemDescription}>{item?.description}</Text>
-          )}
-        </View>
-      );
-    } else if (section == "references") {
-      return (
-        <View style={styles.itemContainer}>
-          <Text style={styles.itemTitle}>{item?.name}</Text>
-          <Text style={styles.itemSubtitle}>{item?.position} at {item?.company}</Text>
-          <Text style={styles.itemDetail}>Email: {item?.email}</Text>
-          <Text style={styles.itemDetail}>Phone: {item?.phone}</Text>
-        </View>
-      );
+  const getProficiencyColor = (proficiency: string) => {
+    switch (proficiency?.toLowerCase()) {
+      case 'expert':
+      case 'native':
+        return { backgroundColor: '#34C759' };
+      case 'advanced':
+      case 'fluent':
+        return { backgroundColor: '#007AFF' };
+      case 'intermediate':
+        return { backgroundColor: '#FF9500' };
+      case 'beginner':
+      case 'basic':
+        return { backgroundColor: '#FF3B30' };
+      default:
+        return { backgroundColor: '#8E8E93' };
     }
-
-    return null;
   };
+
+  const getProficiencyColorValue = (proficiency: string) => {
+    switch (proficiency?.toLowerCase()) {
+      case 'expert':
+      case 'native':
+        return colors.success;
+      case 'advanced':
+      case 'fluent':
+        return colors.primary;
+      case 'intermediate':
+        return colors.warning;
+      case 'beginner':
+      case 'basic':
+        return colors.error;
+      default:
+        return colors.textSecondary;
+    }
+  };
+
+  const renderItem = ({ item, index }: { item: any; index: number }) => {
+    switch (section) {
+      case "experience":
+        return (
+          <EnhancedCard
+            title={item?.jobTitle}
+            subtitle={`${item?.companyName} • ${item?.location}`}
+            description={item?.description}
+            iconName="briefcase"
+            delay={index * 100}
+          >
+            <Text style={styles.itemDetail}>{item?.duration}</Text>
+          </EnhancedCard>
+        );
+
+      case "hobbies/interests":
+        return (
+          <EnhancedCard
+            title={item?.hobbyName}
+            description={item?.description}
+            iconName="heart"
+            delay={index * 100}
+          />
+        );
+
+      case "skills":
+        return (
+          <EnhancedCard
+            title={item?.skillName}
+            iconName="trophy"
+            badge={{
+              text: item?.proficiency,
+              color: getProficiencyColorValue(item?.proficiency)
+            }}
+            delay={index * 100}
+          />
+        );
+
+      case "projects":
+        return (
+          <EnhancedCard
+            title={item?.projectName}
+            subtitle={item?.technologies}
+            description={item?.description}
+            iconName="rocket"
+            delay={index * 100}
+          >
+            <Text style={styles.itemDetail}>Duration: {item?.duration}</Text>
+          </EnhancedCard>
+        );
+
+      case "qualifications":
+        return (
+          <EnhancedCard
+            title={item?.degree}
+            subtitle={item?.institutionName}
+            iconName="school"
+            delay={index * 100}
+          >
+            <Text style={styles.itemDetail}>Completion: {item?.completionYear}</Text>
+            {item?.grade && (
+              <Text style={styles.itemDetail}>Grade: {item?.grade}</Text>
+            )}
+          </EnhancedCard>
+        );
+
+      case "languages":
+        return (
+          <EnhancedCard
+            title={item?.language}
+            iconName="language"
+            badge={{
+              text: item?.proficiency,
+              color: getProficiencyColorValue(item?.proficiency)
+            }}
+            delay={index * 100}
+          />
+        );
+
+      case "certificates":
+        return (
+          <EnhancedCard
+            title={item?.certificateName}
+            subtitle={item?.issuingOrganization}
+            description={item?.description}
+            iconName="document"
+            delay={index * 100}
+          >
+            <Text style={styles.itemDetail}>Issue Date: {item?.issueDate}</Text>
+            {item?.expirationDate && (
+              <Text style={styles.itemDetail}>Expires: {item?.expirationDate}</Text>
+            )}
+          </EnhancedCard>
+        );
+
+      case "awards/scholarships":
+        return (
+          <EnhancedCard
+            title={item?.awardName}
+            subtitle={item?.issuingOrganization}
+            description={item?.description}
+            iconName="trophy"
+            delay={index * 100}
+          >
+            <Text style={styles.itemDetail}>Date Received: {item?.dateReceived}</Text>
+          </EnhancedCard>
+        );
+
+      case "organizations":
+        return (
+          <EnhancedCard
+            title={item?.organizationName}
+            subtitle={`Role: ${item?.role}`}
+            description={item?.description}
+            iconName="business"
+            delay={index * 100}
+          >
+            <Text style={styles.itemDetail}>Duration: {item?.duration}</Text>
+          </EnhancedCard>
+        );
+
+      case "references":
+        return (
+          <EnhancedCard
+            title={item?.name}
+            subtitle={`${item?.position} at ${item?.company}`}
+            iconName="person"
+            delay={index * 100}
+          >
+            <Text style={styles.itemDetail}>Email: {item?.email}</Text>
+            <Text style={styles.itemDetail}>Phone: {item?.phone}</Text>
+          </EnhancedCard>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   const getSectionData = () => {
     switch (section) {
       case "experience":
@@ -156,8 +232,8 @@ const SectionScreen: React.FC<SectionScreenProps> = ({
   };
 
   const data = getSectionData();
-    const handleAddPress = () => {
-    console.log("hello");
+
+  const handleAddPress = () => {
     const sectionToRouteMap: { [key: string]: string } = {
       projects: "AddProjects",
       skills: "AddSkill",
@@ -171,36 +247,53 @@ const SectionScreen: React.FC<SectionScreenProps> = ({
       experience: "AddExperience",
     };
 
-    const routeName = sectionToRouteMap[section];    console.log("data",routeName);
+    const routeName = sectionToRouteMap[section];
     if (routeName) {
       (navigation as any).navigate(routeName, { section });
     } else {
       console.warn(`No route defined for section: ${section}`);
     }
   };
+
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#007AFF" />
-      <Animated.View entering={FadeInUp.duration(500)} style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{sectionName}</Text>
-        <View style={{ width: 24 }} />
-      </Animated.View>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <LinearGradient
+        colors={[colors.gradientStart, colors.gradientEnd]}
+        style={styles.header}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <Animated.View entering={FadeInUp.duration(500)} style={styles.headerContent}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{sectionName}</Text>
+          <View style={{ width: 24 }} />
+        </Animated.View>
+      </LinearGradient>
 
-      {data.length == 0 ? (
+      {data.length === 0 ? (
         <Animated.View
           entering={FadeInUp.duration(500).delay(200)}
           style={styles.content}
         >
-          <Ionicons name={iconName} size={24} color="#fff" />
+          <View style={styles.emptyStateIcon}>
+            <Ionicons name={iconName} size={64} color={colors.primary} />
+          </View>
           <Text style={styles.message}>No {section} added yet...</Text>
           <Text style={styles.subMessage}>
             Click on the plus button to add {section}
           </Text>
           <TouchableOpacity onPress={handleAddPress} style={styles.addButton}>
-            <Ionicons name="add" size={24} color="#fff" />
+            <LinearGradient
+              colors={[colors.primary, colors.primaryDark]}
+              style={styles.addButtonGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="add" size={24} color="#fff" />
+            </LinearGradient>
           </TouchableOpacity>
         </Animated.View>
       ) : (
@@ -210,12 +303,20 @@ const SectionScreen: React.FC<SectionScreenProps> = ({
             renderItem={renderItem}
             keyExtractor={(item, index) => `${section}-${index}`}
             contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
           />
           <TouchableOpacity
             onPress={handleAddPress}
             style={styles.addButtonFloating}
           >
-            <Ionicons name="add" size={24} color="#fff" />
+            <LinearGradient
+              colors={[colors.primary, colors.primaryDark]}
+              style={styles.addButtonFloatingGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="add" size={24} color="#fff" />
+            </LinearGradient>
           </TouchableOpacity>
         </View>
       )}
@@ -228,115 +329,90 @@ export default SectionScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.background,
   },
   header: {
+    paddingVertical: spacing.lg,
+    paddingHorizontal: spacing.lg,
+    paddingTop: (StatusBar.currentHeight || 0) + spacing.lg,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    ...shadows.medium,
+  },
+  headerContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: 18,
-    paddingHorizontal: 20,
-    paddingTop: StatusBar.currentHeight || 40,
-    backgroundColor: "#007AFF",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+  },
+  backButton: {
+    padding: spacing.xs,
+    borderRadius: 8,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
+    ...typography.h2,
     color: "#fff",
-    paddingTop: 20,
+    fontWeight: "700",
   },
   content: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
-    marginTop: 20,
+    padding: spacing.xl,
+  },
+  emptyStateIcon: {
+    padding: spacing.lg,
+    borderRadius: 60,
+    backgroundColor: colors.cardBackground,
+    marginBottom: spacing.lg,
+    ...shadows.small,
   },
   message: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginTop: 20,
+    ...typography.h3,
+    color: colors.text,
+    marginBottom: spacing.sm,
+    textAlign: "center",
   },
   subMessage: {
-    fontSize: 14,
-    color: "#666",
-    marginTop: 5,
-    marginBottom: 20,
+    ...typography.body,
+    color: colors.textSecondary,
+    marginBottom: spacing.xl,
+    textAlign: "center",
   },
   addButton: {
-    backgroundColor: "#007AFF",
+    borderRadius: 30,
+    ...shadows.medium,
+  },
+  addButtonGradient: {
     width: 60,
     height: 60,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   listContainer: {
     flex: 1,
-    padding: 20,
+    padding: spacing.lg,
   },
   listContent: {
-    paddingBottom: 80,
-  },
-  itemContainer: {
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 15,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  itemTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 5,
-  },
-  itemSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 5,
+    paddingBottom: 100,
   },
   itemDetail: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 5,
-  },
-  itemDescription: {
-    fontSize: 14,
-    color: "#333",
-    marginTop: 5,
+    ...typography.caption,
+    color: colors.textSecondary,
+    marginTop: spacing.xs,
   },
   addButtonFloating: {
     position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "#007AFF",
+    bottom: spacing.lg,
+    right: spacing.lg,
+    borderRadius: 30,
+    ...shadows.large,
+  },
+  addButtonFloatingGradient: {
     width: 60,
     height: 60,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
   },
 });

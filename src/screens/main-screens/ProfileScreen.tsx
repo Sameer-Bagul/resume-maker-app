@@ -2,10 +2,12 @@ import { Image, StyleSheet, StatusBar, Text, View, FlatList, TouchableOpacity } 
 import React from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from "@expo/vector-icons"
+import { useAppContext } from '../../context/AppContext'
 
 const ProfileScreen = () => {
 
   const navigation = useNavigation() as any
+  const { state } = useAppContext()
 
   const ProfileSection = [
     { id: '0', title: 'Personal Details', icon: 'person-outline', screen: 'PersonalDetails' },
@@ -22,16 +24,57 @@ const ProfileScreen = () => {
     { id: '11', title: 'References', icon: 'people-outline', screen: 'References' },
   ]
 
+  console.log("data", state) 
+
+  const hasDataForSection = (screen: string) => {
+    // This function should check if the user has data for the given section
+    switch (screen) {
+      case 'PersonalDetails':
+        return !!state.personalDetails;
+      case 'Objective':
+        return !!state.objective;
+      case 'Experience':
+        return state.experiences.length > 0;
+      case 'Qualifications':
+        return state.qualifications.length > 0;
+      case 'Organizations':
+        return state.organizations.length > 0;
+      case 'Projects':
+        return state.projects.length > 0;
+      case 'Certificates':
+        return state.certificates.length > 0;
+      case 'AwardsScholarships':
+        return state.awards.length > 0;
+      case 'Skills':
+        return state.skills.length > 0;
+      case 'Languages':
+        return state.languages.length > 0;
+      case 'HobbiesInterests':
+        return state.hobbies.length > 0;
+      case 'References':
+        return state.references.length > 0;
+      default:
+        return false;
+    }
+  }
+
   const renderSection = ({ item, index }: { item: typeof ProfileSection[0]; index: number }) => {
     return (
       <View>
-        <TouchableOpacity 
-          style={styles.section}  
+        <TouchableOpacity
+          style={styles.section}
           onPress={() => navigation.navigate(item.screen)}>
-          <Ionicons name={item.icon as any} size={24} color="#007AFF"  />
+          <Ionicons name={item.icon as any} size={24} color="#007AFF" />
           <Text style={styles.sectionTitle}>{item?.title}</Text>
-          <Ionicons name={'chevron-forward'} size={24} color="#ccc" />
+
+          {hasDataForSection(item.screen) ? (
+            <Ionicons name="checkmark-circle" size={24} color="#28a745" />
+          ) : (
+            <Ionicons name={'chevron-forward'} size={24} color="#ccc" />
+          )}
+
         </TouchableOpacity>
+
       </View>
     )
 
@@ -47,13 +90,19 @@ const ProfileScreen = () => {
 
       <View style={styles.header}>
         <Image
-          source={{ uri: 'https://res.cloudinary.com/dceysplwm/image/upload/v1740252954/IMG_20241228_134355_yglesr.jpg' }}
+          source={{ 
+            uri: state.personalDetails?.avatar || 'https://res.cloudinary.com/dceysplwm/image/upload/v1740252954/IMG_20241228_134355_yglesr.jpg' 
+          }}
           style={styles.avatar}
         />
 
         <View style={styles.headerTextContainer}>
-          <Text style={styles.name}>sameer Bagul</Text>
-          <Text style={styles.title}>Professional Title</Text>
+          <Text style={styles.name}>
+            {state.personalDetails?.name || 'Your Name'}
+          </Text>
+          <Text style={styles.title}>
+            {state.personalDetails?.title || 'Professional Title'}
+          </Text>
         </View>
 
       </View>
