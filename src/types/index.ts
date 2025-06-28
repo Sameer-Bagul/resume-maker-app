@@ -31,6 +31,14 @@ export type RootStackParamList = {
   AddAwardsScholarships: { section?: string };
   AddOrganization: { section?: string };
   AddReferences: { section?: string };
+
+  // Main flow screens
+  Home: undefined;
+  ResumeForm: undefined;
+  TemplateSelection: { resumeData: ResumeData };
+  Template: undefined;
+  TemplatePreview: { template: string; color: string };
+  ResumePreview: { resumeData: ResumeData };
 };
 
 // Form validation types
@@ -44,7 +52,7 @@ export interface ValidationRule {
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: string) => string | null;
+  message?: string;
 }
 
 export interface FormField {
@@ -87,9 +95,8 @@ export interface ButtonProps {
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'outline';
   size?: 'small' | 'medium' | 'large';
-  loading?: boolean;
   disabled?: boolean;
-  icon?: React.ReactNode;
+  loading?: boolean;
 }
 
 export interface HeaderProps {
@@ -99,8 +106,147 @@ export interface HeaderProps {
   onBackPress?: () => void;
 }
 
-// Resume section types (already defined in AppContext, but can be imported here if needed)
+// Resume section types (unified with AppContext)
 export interface SectionItem {
   id?: string;
   [key: string]: any;
+}
+
+// Unified Resume Data Types
+export interface PersonalDetails {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  avatar?: string;
+  title?: string;
+}
+
+export interface Objective {
+  text: string;
+}
+
+export interface Skill {
+  skillName: string;
+  proficiency: string;
+}
+
+export interface Project {
+  projectName: string;
+  description: string;
+  role: string;
+  duration: string;
+  technologies?: string;
+}
+
+export interface Experience {
+  jobTitle: string;
+  companyName: string;
+  location: string;
+  duration: string;
+  description: string;
+  isCurrentlyWorking?: string;
+}
+
+export interface Education {
+  degree: string;
+  institution: string;
+  duration: string;
+  description?: string;
+  grade?: string;
+}
+
+export interface Hobby {
+  hobby: string;
+}
+
+export interface Qualification {
+  degree: string;
+  institution: string;
+  duration: string;
+  description?: string;
+  grade?: string;
+}
+
+export interface Language {
+  language: string;
+  proficiency: string;
+}
+
+export interface Certificate {
+  certificateName: string;
+  issuingOrganization: string;
+  issueDate: string;
+  expirationDate?: string;
+  description?: string;
+}
+
+export interface Award {
+  awardName: string;
+  issuingOrganization: string;
+  dateReceived: string;
+  description?: string;
+}
+
+export interface Organization {
+  organizationName: string;
+  role: string;
+  duration: string;
+  description?: string;
+}
+
+export interface Reference {
+  name: string;
+  position: string;
+  company: string;
+  email: string;
+  phone: string;
+}
+
+// Complete Resume Data (for the resume generation flow)
+export interface ResumeData {
+  // Personal Information
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  title?: string;
+  objective?: string;
+
+  // Experience and Education
+  experience: Experience[];
+  education: Education[];
+  projects: Project[];
+  
+  // Skills and Qualifications
+  skills: Skill[];
+  languages: Language[];
+  certificates: Certificate[];
+  qualifications: Qualification[];
+  
+  // Additional Sections
+  awards: Award[];
+  organizations: Organization[];
+  hobbies: Hobby[];
+  references: Reference[];
+  
+  // Template Settings
+  template: string;
+  color: string;
+}
+
+// Template types
+export interface Template {
+  id: string;
+  name: string;
+  color: string;
+  layout: 'single-column' | 'two-column' | 'modern' | 'creative';
+  preview?: string;
+}
+
+export interface TemplateSection {
+  key: string;
+  title: string;
+  order: number;
+  visible: boolean;
 }

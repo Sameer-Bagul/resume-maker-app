@@ -1,32 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import Animated, { FadeInUp } from 'react-native-reanimated';
-import { useAppContext } from '../context/AppContext';
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import Animated, { FadeInUp } from "react-native-reanimated";
+import { useAppContext } from "../../context/AppContext";
 import { 
   CustomHeader, 
   CustomTextInput, 
   CustomButton,
-  CustomDatePicker
-} from '../components';
-import { globalStyles, formStyles } from '../styles/globalStyles';
+  CustomDatePicker 
+} from "../../components";
+import { globalStyles, formStyles } from "../../styles/globalStyles";
 
-const AddCertificatesScreen = () => {
+const AddQualificationScreen = () => {
   const navigation = useNavigation();
-  const { addCertificate } = useAppContext();
+  const { addQualification } = useAppContext();
 
   const [formData, setFormData] = useState({
-    certificateName: "",
-    issuingOrganization: "",
-    issueDate: undefined as Date | undefined,
-    expirationDate: undefined as Date | undefined,
+    degree: "",
+    institution: "",
+    startDate: undefined as Date | undefined,
+    endDate: undefined as Date | undefined,
     description: "",
+    grade: "",
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -34,25 +35,28 @@ const AddCertificatesScreen = () => {
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
 
-    if (!formData.certificateName.trim()) {
-      newErrors.certificateName = "Certificate name is required";
+    if (!formData.degree.trim()) {
+      newErrors.degree = "Degree is required";
     }
-    if (!formData.issuingOrganization.trim()) {
-      newErrors.issuingOrganization = "Issuing organization is required";
+    if (!formData.institution.trim()) {
+      newErrors.institution = "Institution is required";
     }
-    if (!formData.issueDate) {
-      newErrors.issueDate = "Issue date is required";
+    if (!formData.startDate) {
+      newErrors.startDate = "Start date is required";
+    }
+    if (!formData.endDate) {
+      newErrors.endDate = "End date is required";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const formatDateForStorage = (date: Date) => {
+  const formatDateForDisplay = (date: Date | undefined) => {
+    if (!date) return "";
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+      month: 'short',
     });
   };
 
@@ -62,15 +66,15 @@ const AddCertificatesScreen = () => {
       return;
     }
 
-    const certificate = {
-      certificateName: formData.certificateName.trim(),
-      issuingOrganization: formData.issuingOrganization.trim(),
-      issueDate: formData.issueDate ? formatDateForStorage(formData.issueDate) : "",
-      expirationDate: formData.expirationDate ? formatDateForStorage(formData.expirationDate) : undefined,
+    const qualification = {
+      degree: formData.degree.trim(),
+      institution: formData.institution.trim(),
+      duration: `${formatDateForDisplay(formData.startDate)} - ${formatDateForDisplay(formData.endDate)}`,
       description: formData.description.trim() || undefined,
+      grade: formData.grade.trim() || undefined,
     };
     
-    addCertificate(certificate);
+    addQualification(qualification);
     navigation.goBack();
   };
 
@@ -84,7 +88,7 @@ const AddCertificatesScreen = () => {
 
   return (
     <View style={globalStyles.container}>
-      <CustomHeader title="Add Certificate" />
+      <CustomHeader title="Add Qualification" />
       
       <KeyboardAvoidingView 
         style={formStyles.keyboardAvoidingView}
@@ -101,50 +105,59 @@ const AddCertificatesScreen = () => {
             style={globalStyles.formContainer}
           >
             <CustomTextInput
-              label="Certificate Name"
-              value={formData.certificateName}
-              onChangeText={(text) => updateFormData("certificateName", text)}
-              placeholder="e.g., AWS Certified Solutions Architect"
-              error={errors.certificateName}
+              label="Degree"
+              value={formData.degree}
+              onChangeText={(text) => updateFormData("degree", text)}
+              placeholder="e.g., Bachelor of Computer Science"
+              error={errors.degree}
               required
             />
 
             <CustomTextInput
-              label="Issuing Organization"
-              value={formData.issuingOrganization}
-              onChangeText={(text) => updateFormData("issuingOrganization", text)}
-              placeholder="e.g., Amazon Web Services"
-              error={errors.issuingOrganization}
+              label="Institution"
+              value={formData.institution}
+              onChangeText={(text) => updateFormData("institution", text)}
+              placeholder="e.g., Stanford University"
+              error={errors.institution}
               required
             />
 
             <View style={formStyles.fieldRow}>
               <View style={formStyles.fieldHalf}>
                 <CustomDatePicker
-                  label="Issue Date"
-                  value={formData.issueDate}
-                  onDateChange={(date) => updateFormData("issueDate", date)}
-                  placeholder="Select issue date"
-                  error={errors.issueDate}
+                  label="Start Date"
+                  value={formData.startDate}
+                  onDateChange={(date) => updateFormData("startDate", date)}
+                  placeholder="Select start date"
+                  error={errors.startDate}
                   required
                 />
               </View>
 
               <View style={formStyles.fieldHalf}>
                 <CustomDatePicker
-                  label="Expiration Date (Optional)"
-                  value={formData.expirationDate}
-                  onDateChange={(date) => updateFormData("expirationDate", date)}
-                  placeholder="Select expiration date"
+                  label="End Date"
+                  value={formData.endDate}
+                  onDateChange={(date) => updateFormData("endDate", date)}
+                  placeholder="Select end date"
+                  error={errors.endDate}
+                  required
                 />
               </View>
             </View>
 
             <CustomTextInput
+              label="Grade/GPA (Optional)"
+              value={formData.grade}
+              onChangeText={(text) => updateFormData("grade", text)}
+              placeholder="e.g., 3.8 GPA, First Class"
+            />
+
+            <CustomTextInput
               label="Description (Optional)"
               value={formData.description}
               onChangeText={(text) => updateFormData("description", text)}
-              placeholder="Additional details about the certificate..."
+              placeholder="Additional details about your qualification, achievements, etc."
               multiline
               numberOfLines={4}
               style={globalStyles.multilineInput}
@@ -152,7 +165,7 @@ const AddCertificatesScreen = () => {
 
             <View style={formStyles.buttonContainer}>
               <CustomButton
-                title="Save Certificate"
+                title="Save Qualification"
                 onPress={handleSave}
                 size="large"
               />
@@ -171,4 +184,4 @@ const AddCertificatesScreen = () => {
   );
 };
 
-export default AddCertificatesScreen;
+export default AddQualificationScreen;

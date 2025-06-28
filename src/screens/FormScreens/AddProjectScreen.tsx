@@ -8,26 +8,26 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext } from "../../context/AppContext";
 import { 
   CustomHeader, 
   CustomTextInput, 
   CustomButton,
   CustomDatePicker 
-} from "../components";
-import { globalStyles, formStyles } from "../styles/globalStyles";
+} from "../../components";
+import { globalStyles, formStyles } from "../../styles/globalStyles";
 
-const AddQualificationScreen = () => {
+const AddProjectScreen = () => {
   const navigation = useNavigation();
-  const { addQualification } = useAppContext();
+  const { addProject } = useAppContext();
 
   const [formData, setFormData] = useState({
-    degree: "",
-    institution: "",
+    projectName: "",
+    description: "",
+    role: "",
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
-    description: "",
-    grade: "",
+    technologies: "",
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -35,11 +35,14 @@ const AddQualificationScreen = () => {
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
 
-    if (!formData.degree.trim()) {
-      newErrors.degree = "Degree is required";
+    if (!formData.projectName.trim()) {
+      newErrors.projectName = "Project name is required";
     }
-    if (!formData.institution.trim()) {
-      newErrors.institution = "Institution is required";
+    if (!formData.description.trim()) {
+      newErrors.description = "Description is required";
+    }
+    if (!formData.role.trim()) {
+      newErrors.role = "Your role is required";
     }
     if (!formData.startDate) {
       newErrors.startDate = "Start date is required";
@@ -66,15 +69,12 @@ const AddQualificationScreen = () => {
       return;
     }
 
-    const qualification = {
-      degree: formData.degree.trim(),
-      institution: formData.institution.trim(),
+    addProject({
+      projectName: formData.projectName,
+      description: formData.description,
+      role: formData.role,
       duration: `${formatDateForDisplay(formData.startDate)} - ${formatDateForDisplay(formData.endDate)}`,
-      description: formData.description.trim() || undefined,
-      grade: formData.grade.trim() || undefined,
-    };
-    
-    addQualification(qualification);
+    });
     navigation.goBack();
   };
 
@@ -88,7 +88,7 @@ const AddQualificationScreen = () => {
 
   return (
     <View style={globalStyles.container}>
-      <CustomHeader title="Add Qualification" />
+      <CustomHeader title="Add Project" />
       
       <KeyboardAvoidingView 
         style={formStyles.keyboardAvoidingView}
@@ -105,21 +105,42 @@ const AddQualificationScreen = () => {
             style={globalStyles.formContainer}
           >
             <CustomTextInput
-              label="Degree"
-              value={formData.degree}
-              onChangeText={(text) => updateFormData("degree", text)}
-              placeholder="e.g., Bachelor of Computer Science"
-              error={errors.degree}
+              label="Project Name"
+              value={formData.projectName}
+              onChangeText={(text) => updateFormData("projectName", text)}
+              placeholder="e.g., E-commerce Mobile App"
+              error={errors.projectName}
               required
             />
 
             <CustomTextInput
-              label="Institution"
-              value={formData.institution}
-              onChangeText={(text) => updateFormData("institution", text)}
-              placeholder="e.g., Stanford University"
-              error={errors.institution}
+              label="Project Description"
+              value={formData.description}
+              onChangeText={(text) => updateFormData("description", text)}
+              placeholder="Describe the project, technologies used, and key features..."
+              error={errors.description}
+              multiline
+              numberOfLines={6}
+              style={globalStyles.multilineInput}
               required
+            />
+
+            <CustomTextInput
+              label="Your Role"
+              value={formData.role}
+              onChangeText={(text) => updateFormData("role", text)}
+              placeholder="e.g., Lead Developer, UI/UX Designer"
+              error={errors.role}
+              required
+            />
+
+            <CustomTextInput
+              label="Technologies Used"
+              value={formData.technologies}
+              onChangeText={(text) => updateFormData("technologies", text)}
+              placeholder="e.g., React Native, TypeScript, Firebase"
+              multiline
+              numberOfLines={2}
             />
 
             <View style={formStyles.fieldRow}>
@@ -146,26 +167,9 @@ const AddQualificationScreen = () => {
               </View>
             </View>
 
-            <CustomTextInput
-              label="Grade/GPA (Optional)"
-              value={formData.grade}
-              onChangeText={(text) => updateFormData("grade", text)}
-              placeholder="e.g., 3.8 GPA, First Class"
-            />
-
-            <CustomTextInput
-              label="Description (Optional)"
-              value={formData.description}
-              onChangeText={(text) => updateFormData("description", text)}
-              placeholder="Additional details about your qualification, achievements, etc."
-              multiline
-              numberOfLines={4}
-              style={globalStyles.multilineInput}
-            />
-
             <View style={formStyles.buttonContainer}>
               <CustomButton
-                title="Save Qualification"
+                title="Save Project"
                 onPress={handleSave}
                 size="large"
               />
@@ -184,4 +188,4 @@ const AddQualificationScreen = () => {
   );
 };
 
-export default AddQualificationScreen;
+export default AddProjectScreen;

@@ -1,11 +1,15 @@
 import { FlatList, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useNavigation } from '@react-navigation/native';
-import { template } from '@babel/core';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+type TemplateStackParamList = {
+  Template: undefined;
+  TemplatePreview: { template: string; color: string };
+};
 
 const TemplateScreen = () => {
-
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<TemplateStackParamList>>();
 
   const templates = [
     { id: '1', name: 'Professional', color: "white", layout: "two-column" },
@@ -122,7 +126,15 @@ const TemplateScreen = () => {
         </View>
       </View>
 
-        <TouchableOpacity style={styles.useButton}>
+        <TouchableOpacity 
+          onPress={() => {
+            navigation.navigate("TemplatePreview", {
+              template: item?.name,
+              color:item?.color
+            });
+          }}
+          style={styles.useButton}
+        >
           <Text style={styles.useButtonText}>Use This Template</Text>
         </TouchableOpacity>
     </View>

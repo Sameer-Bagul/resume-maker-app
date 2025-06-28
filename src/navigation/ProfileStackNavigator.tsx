@@ -12,16 +12,16 @@ import SkillsScreen from "../screens/profile-screens/SkillsScreen";
 import LanguagesScreen from "../screens/profile-screens/LanguagesScreen";
 import HobbiesInterestsScreen from "../screens/profile-screens/HobbiesInterestsScreen";
 import ReferencesScreen from "../screens/profile-screens/ReferencesScreen";
-import AddExperienceScreen from "../FormScreens/AddExperienceScreen";
-import AddOrganizationScreen from "../FormScreens/AddOrganizationScreen";
-import AddLanguageScreen from "../FormScreens/AddLanguageScreen";
-import AddCertificatesScreen from "../FormScreens/AddCertificatesScreen";
-import AddSkillScreen from "../FormScreens/AddSkillScreen";
-import AddReferencesScreen from "../FormScreens/AddReferencesScreen";
-import AddProjectScreen from "../FormScreens/AddProjectScreen";
-import AddAwardsScholarshipsScreen from "../FormScreens/AddAwardsScholarshipsScreen";
-import AddHobbyScreen from "../FormScreens/AddHobbyScreen";
-import AddQualificationScreen from "../FormScreens/AddQualificationScreen";
+import AddExperienceScreen from "../screens/FormScreens/AddExperienceScreen";
+import AddOrganizationScreen from "../screens/FormScreens/AddOrganizationScreen";
+import AddLanguageScreen from "../screens/FormScreens/AddLanguageScreen";
+import AddCertificatesScreen from "../screens/FormScreens/AddCertificatesScreen";
+import AddSkillScreen from "../screens/FormScreens/AddSkillScreen";
+import AddReferencesScreen from "../screens/FormScreens/AddReferencesScreen";
+import AddProjectScreen from "../screens/FormScreens/AddProjectScreen";
+import AddAwardsScholarshipsScreen from "../screens/FormScreens/AddAwardsScholarshipsScreen";
+import AddHobbyScreen from "../screens/FormScreens/AddHobbyScreen";
+import AddQualificationScreen from "../screens/FormScreens/AddQualificationScreen";
 
 const Stack = createNativeStackNavigator();
 

@@ -1,33 +1,34 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Alert,
   KeyboardAvoidingView,
   Platform,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import Animated, { FadeInUp } from "react-native-reanimated";
-import { useAppContext } from "../context/AppContext";
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import { useAppContext } from '../../context/AppContext';
 import { 
   CustomHeader, 
   CustomTextInput, 
   CustomButton,
-  CustomDatePicker 
-} from "../components";
-import { globalStyles, formStyles } from "../styles/globalStyles";
+  CustomDatePicker,
+  CustomPicker 
+} from '../../components';
+import { globalStyles, formStyles } from '../../styles/globalStyles';
 
-const AddProjectScreen = () => {
+const AddOrganizationScreen = () => {
   const navigation = useNavigation();
-  const { addProject } = useAppContext();
+  const { addOrganization } = useAppContext();
 
   const [formData, setFormData] = useState({
-    projectName: "",
-    description: "",
+    organizationName: "",
     role: "",
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
-    technologies: "",
+    description: "",
+    isCurrentlyActive: false,
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -35,19 +36,16 @@ const AddProjectScreen = () => {
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
 
-    if (!formData.projectName.trim()) {
-      newErrors.projectName = "Project name is required";
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
+    if (!formData.organizationName.trim()) {
+      newErrors.organizationName = "Organization name is required";
     }
     if (!formData.role.trim()) {
-      newErrors.role = "Your role is required";
+      newErrors.role = "Role is required";
     }
     if (!formData.startDate) {
       newErrors.startDate = "Start date is required";
     }
-    if (!formData.endDate) {
+    if (!formData.isCurrentlyActive && !formData.endDate) {
       newErrors.endDate = "End date is required";
     }
 
@@ -69,16 +67,20 @@ const AddProjectScreen = () => {
       return;
     }
 
-    addProject({
-      projectName: formData.projectName,
-      description: formData.description,
-      role: formData.role,
-      duration: `${formatDateForDisplay(formData.startDate)} - ${formatDateForDisplay(formData.endDate)}`,
-    });
+    const organization = {
+      organizationName: formData.organizationName.trim(),
+      role: formData.role.trim(),
+      duration: `${formatDateForDisplay(formData.startDate)} - ${
+        formData.isCurrentlyActive ? "Present" : formatDateForDisplay(formData.endDate)
+      }`,
+      description: formData.description.trim() || undefined,
+    };
+    
+    addOrganization(organization);
     navigation.goBack();
   };
 
-  const updateFormData = (field: string, value: string | Date) => {
+  const updateFormData = (field: string, value: string | boolean | Date) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -88,7 +90,7 @@ const AddProjectScreen = () => {
 
   return (
     <View style={globalStyles.container}>
-      <CustomHeader title="Add Project" />
+      <CustomHeader title="Add Organization" />
       
       <KeyboardAvoidingView 
         style={formStyles.keyboardAvoidingView}
@@ -105,23 +107,11 @@ const AddProjectScreen = () => {
             style={globalStyles.formContainer}
           >
             <CustomTextInput
-              label="Project Name"
-              value={formData.projectName}
-              onChangeText={(text) => updateFormData("projectName", text)}
-              placeholder="e.g., E-commerce Mobile App"
-              error={errors.projectName}
-              required
-            />
-
-            <CustomTextInput
-              label="Project Description"
-              value={formData.description}
-              onChangeText={(text) => updateFormData("description", text)}
-              placeholder="Describe the project, technologies used, and key features..."
-              error={errors.description}
-              multiline
-              numberOfLines={6}
-              style={globalStyles.multilineInput}
+              label="Organization Name"
+              value={formData.organizationName}
+              onChangeText={(text) => updateFormData("organizationName", text)}
+              placeholder="e.g., IEEE Computer Society, Red Cross"
+              error={errors.organizationName}
               required
             />
 
@@ -129,18 +119,9 @@ const AddProjectScreen = () => {
               label="Your Role"
               value={formData.role}
               onChangeText={(text) => updateFormData("role", text)}
-              placeholder="e.g., Lead Developer, UI/UX Designer"
+              placeholder="e.g., President, Volunteer, Member"
               error={errors.role}
               required
-            />
-
-            <CustomTextInput
-              label="Technologies Used"
-              value={formData.technologies}
-              onChangeText={(text) => updateFormData("technologies", text)}
-              placeholder="e.g., React Native, TypeScript, Firebase"
-              multiline
-              numberOfLines={2}
             />
 
             <View style={formStyles.fieldRow}>
@@ -149,7 +130,6 @@ const AddProjectScreen = () => {
                   label="Start Date"
                   value={formData.startDate}
                   onDateChange={(date) => updateFormData("startDate", date)}
-                  placeholder="Select start date"
                   error={errors.startDate}
                   required
                 />
@@ -158,18 +138,42 @@ const AddProjectScreen = () => {
               <View style={formStyles.fieldHalf}>
                 <CustomDatePicker
                   label="End Date"
-                  value={formData.endDate}
-                  onDateChange={(date) => updateFormData("endDate", date)}
-                  placeholder="Select end date"
+                  value={formData.isCurrentlyActive ? undefined : formData.endDate}
+                  onDateChange={(date) => {
+                    if (!formData.isCurrentlyActive) {
+                      updateFormData("endDate", date);
+                    }
+                  }}
+                  placeholder={formData.isCurrentlyActive ? "Present" : "Select end date"}
                   error={errors.endDate}
-                  required
                 />
               </View>
             </View>
 
+            <CustomPicker
+              label="Currently Active"
+              value={formData.isCurrentlyActive.toString()}
+              options={[
+                { label: "Yes", value: "true" },
+                { label: "No", value: "false" },
+              ]}
+              onValueChange={(value) => updateFormData("isCurrentlyActive", value === "true")}
+              placeholder="Select option"
+            />
+
+            <CustomTextInput
+              label="Description (Optional)"
+              value={formData.description}
+              onChangeText={(text) => updateFormData("description", text)}
+              placeholder="Describe your contributions and activities in the organization..."
+              multiline
+              numberOfLines={4}
+              style={globalStyles.multilineInput}
+            />
+
             <View style={formStyles.buttonContainer}>
               <CustomButton
-                title="Save Project"
+                title="Save Organization"
                 onPress={handleSave}
                 size="large"
               />
@@ -188,4 +192,4 @@ const AddProjectScreen = () => {
   );
 };
 
-export default AddProjectScreen;
+export default AddOrganizationScreen;

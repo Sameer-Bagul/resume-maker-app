@@ -8,7 +8,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Animated, { FadeInUp } from "react-native-reanimated";
-import { useAppContext } from "../context/AppContext";
+import { useAppContext } from "../../context/AppContext";
 import { 
   CustomHeader, 
   CustomTextInput, 
@@ -16,8 +16,8 @@ import {
   CustomPicker,
   CustomDatePicker,
   SuccessFeedback
-} from "../components";
-import { globalStyles, formStyles, colors, spacing } from "../styles/globalStyles";
+} from "../../components";
+import { globalStyles, formStyles, colors, spacing } from "../../styles/globalStyles";
 
 const AddExperienceScreen = () => {
   const navigation = useNavigation();

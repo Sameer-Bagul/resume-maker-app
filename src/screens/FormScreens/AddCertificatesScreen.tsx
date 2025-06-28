@@ -8,27 +8,25 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { useAppContext } from '../context/AppContext';
+import { useAppContext } from '../../context/AppContext';
 import { 
   CustomHeader, 
   CustomTextInput, 
   CustomButton,
-  CustomDatePicker,
-  CustomPicker 
-} from '../components';
-import { globalStyles, formStyles } from '../styles/globalStyles';
+  CustomDatePicker
+} from '../../components';
+import { globalStyles, formStyles } from '../../styles/globalStyles';
 
-const AddOrganizationScreen = () => {
+const AddCertificatesScreen = () => {
   const navigation = useNavigation();
-  const { addOrganization } = useAppContext();
+  const { addCertificate } = useAppContext();
 
   const [formData, setFormData] = useState({
-    organizationName: "",
-    role: "",
-    startDate: undefined as Date | undefined,
-    endDate: undefined as Date | undefined,
+    certificateName: "",
+    issuingOrganization: "",
+    issueDate: undefined as Date | undefined,
+    expirationDate: undefined as Date | undefined,
     description: "",
-    isCurrentlyActive: false,
   });
 
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -36,28 +34,25 @@ const AddOrganizationScreen = () => {
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
 
-    if (!formData.organizationName.trim()) {
-      newErrors.organizationName = "Organization name is required";
+    if (!formData.certificateName.trim()) {
+      newErrors.certificateName = "Certificate name is required";
     }
-    if (!formData.role.trim()) {
-      newErrors.role = "Role is required";
+    if (!formData.issuingOrganization.trim()) {
+      newErrors.issuingOrganization = "Issuing organization is required";
     }
-    if (!formData.startDate) {
-      newErrors.startDate = "Start date is required";
-    }
-    if (!formData.isCurrentlyActive && !formData.endDate) {
-      newErrors.endDate = "End date is required";
+    if (!formData.issueDate) {
+      newErrors.issueDate = "Issue date is required";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const formatDateForDisplay = (date: Date | undefined) => {
-    if (!date) return "";
+  const formatDateForStorage = (date: Date) => {
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
-      month: 'short',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
@@ -67,20 +62,19 @@ const AddOrganizationScreen = () => {
       return;
     }
 
-    const organization = {
-      organizationName: formData.organizationName.trim(),
-      role: formData.role.trim(),
-      duration: `${formatDateForDisplay(formData.startDate)} - ${
-        formData.isCurrentlyActive ? "Present" : formatDateForDisplay(formData.endDate)
-      }`,
+    const certificate = {
+      certificateName: formData.certificateName.trim(),
+      issuingOrganization: formData.issuingOrganization.trim(),
+      issueDate: formData.issueDate ? formatDateForStorage(formData.issueDate) : "",
+      expirationDate: formData.expirationDate ? formatDateForStorage(formData.expirationDate) : undefined,
       description: formData.description.trim() || undefined,
     };
     
-    addOrganization(organization);
+    addCertificate(certificate);
     navigation.goBack();
   };
 
-  const updateFormData = (field: string, value: string | boolean | Date) => {
+  const updateFormData = (field: string, value: string | Date) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -90,7 +84,7 @@ const AddOrganizationScreen = () => {
 
   return (
     <View style={globalStyles.container}>
-      <CustomHeader title="Add Organization" />
+      <CustomHeader title="Add Certificate" />
       
       <KeyboardAvoidingView 
         style={formStyles.keyboardAvoidingView}
@@ -107,65 +101,50 @@ const AddOrganizationScreen = () => {
             style={globalStyles.formContainer}
           >
             <CustomTextInput
-              label="Organization Name"
-              value={formData.organizationName}
-              onChangeText={(text) => updateFormData("organizationName", text)}
-              placeholder="e.g., IEEE Computer Society, Red Cross"
-              error={errors.organizationName}
+              label="Certificate Name"
+              value={formData.certificateName}
+              onChangeText={(text) => updateFormData("certificateName", text)}
+              placeholder="e.g., AWS Certified Solutions Architect"
+              error={errors.certificateName}
               required
             />
 
             <CustomTextInput
-              label="Your Role"
-              value={formData.role}
-              onChangeText={(text) => updateFormData("role", text)}
-              placeholder="e.g., President, Volunteer, Member"
-              error={errors.role}
+              label="Issuing Organization"
+              value={formData.issuingOrganization}
+              onChangeText={(text) => updateFormData("issuingOrganization", text)}
+              placeholder="e.g., Amazon Web Services"
+              error={errors.issuingOrganization}
               required
             />
 
             <View style={formStyles.fieldRow}>
               <View style={formStyles.fieldHalf}>
                 <CustomDatePicker
-                  label="Start Date"
-                  value={formData.startDate}
-                  onDateChange={(date) => updateFormData("startDate", date)}
-                  error={errors.startDate}
+                  label="Issue Date"
+                  value={formData.issueDate}
+                  onDateChange={(date) => updateFormData("issueDate", date)}
+                  placeholder="Select issue date"
+                  error={errors.issueDate}
                   required
                 />
               </View>
 
               <View style={formStyles.fieldHalf}>
                 <CustomDatePicker
-                  label="End Date"
-                  value={formData.isCurrentlyActive ? undefined : formData.endDate}
-                  onDateChange={(date) => {
-                    if (!formData.isCurrentlyActive) {
-                      updateFormData("endDate", date);
-                    }
-                  }}
-                  placeholder={formData.isCurrentlyActive ? "Present" : "Select end date"}
-                  error={errors.endDate}
+                  label="Expiration Date (Optional)"
+                  value={formData.expirationDate}
+                  onDateChange={(date) => updateFormData("expirationDate", date)}
+                  placeholder="Select expiration date"
                 />
               </View>
             </View>
-
-            <CustomPicker
-              label="Currently Active"
-              value={formData.isCurrentlyActive.toString()}
-              options={[
-                { label: "Yes", value: "true" },
-                { label: "No", value: "false" },
-              ]}
-              onValueChange={(value) => updateFormData("isCurrentlyActive", value === "true")}
-              placeholder="Select option"
-            />
 
             <CustomTextInput
               label="Description (Optional)"
               value={formData.description}
               onChangeText={(text) => updateFormData("description", text)}
-              placeholder="Describe your contributions and activities in the organization..."
+              placeholder="Additional details about the certificate..."
               multiline
               numberOfLines={4}
               style={globalStyles.multilineInput}
@@ -173,7 +152,7 @@ const AddOrganizationScreen = () => {
 
             <View style={formStyles.buttonContainer}>
               <CustomButton
-                title="Save Organization"
+                title="Save Certificate"
                 onPress={handleSave}
                 size="large"
               />
@@ -192,4 +171,4 @@ const AddOrganizationScreen = () => {
   );
 };
 
-export default AddOrganizationScreen;
+export default AddCertificatesScreen;
